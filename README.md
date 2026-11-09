@@ -22,7 +22,7 @@
 
 ## Requirements
 
-- Linux PC with Python 3 and `adb` (`android-tools`).
+- Linux PC with Python 3, `adb` (`android-tools`) and `scrcpy`: its server reads the phone's clipboard and streams the screen as video, much faster than `adb screencap` (~1.2 s per capture), which is still used as a fallback.
 - Android phone plugged in over USB with **USB debugging** on. Alarms use the standard `SET_ALARM` intent; removing old alarms is tuned for Samsung's Clock app.
 - Optional: Google Calendar (OAuth client created once in Google Cloud Console — the app walks you through it), or the phone's own calendar.
 

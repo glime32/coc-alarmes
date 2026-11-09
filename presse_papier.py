@@ -26,6 +26,19 @@ def version_scrcpy() -> str:
     return m.group(1)
 
 
+def envoyer_serveur(adb: list[str]) -> str:
+    """Copie le serveur de scrcpy sur le téléphone s'il n'y est pas déjà, et renvoie sa version."""
+    ver = version_scrcpy()
+    taille = os.path.getsize(SERVEUR_PC)
+    st = subprocess.run([*adb, "shell", f"stat -c %s {SERVEUR_TEL} 2>/dev/null"],
+                        capture_output=True, text=True, timeout=30).stdout.strip()
+    if st != str(taille):
+        r = subprocess.run([*adb, "push", SERVEUR_PC, SERVEUR_TEL], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            raise RuntimeError("envoi du serveur scrcpy raté : " + r.stderr.strip())
+    return ver
+
+
 class PontPressePapier:
     def __init__(self, serial: str, quand_change=None):
         self.serial = serial
@@ -45,13 +58,7 @@ class PontPressePapier:
     def demarrer(self):
         if self.actif:
             return
-        ver = version_scrcpy()
-        taille = os.path.getsize(SERVEUR_PC)
-        st = self._adb("shell", f"stat -c %s {SERVEUR_TEL} 2>/dev/null").stdout.strip()
-        if st != str(taille):
-            r = self._adb("push", SERVEUR_PC, SERVEUR_TEL)
-            if r.returncode != 0:
-                raise RuntimeError("envoi du serveur scrcpy raté : " + r.stderr.strip())
+        ver = envoyer_serveur(["adb", "-s", self.serial])
         self.scid = random.randint(1, 0x7FFFFFFF)
         nom = f"scrcpy_{self.scid:08x}"
         r = self._adb("forward", "tcp:0", f"localabstract:{nom}")

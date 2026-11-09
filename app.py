@@ -110,6 +110,7 @@ class SuiviWorker(QThread):
                 return
             debut = time.time()
             while not self.stop and time.time() - debut < self.max_s:
+                tour = time.time()
                 img, t = self.adb.screencap()
                 for e in suivi.traiter(img, t):
                     self.progres.emit(e, 0, 0)
@@ -118,6 +119,8 @@ class SuiviWorker(QThread):
                 self.progres.emit("", ok, n)
                 if suivi.fini(t):
                     break
+                # 4 lectures par seconde suffisent (±0,13 s) : la vidéo irait plus vite, pour rien
+                time.sleep(max(0.0, 0.25 - (time.time() - tour)))
             suivi.appliquer()
             self.fini.emit(suivi)
         except AdbError as e:
@@ -1374,6 +1377,7 @@ class Fenetre(QMainWindow):
         save_json(STATE_FILE, st)
         if self.pont is not None:
             self.pont.arreter()
+        self.adb.arreter_video()
         if self.tray is not None:
             self.tray.hide()
         for w in list(self.workers):

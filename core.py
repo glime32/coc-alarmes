@@ -7,12 +7,15 @@ import re
 import shlex
 import struct
 import subprocess
+import sys
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from PIL import Image
+
+import video
 
 DATA_DIR = Path.home() / ".local/share/coc-alarmes"
 ICON_DIR = DATA_DIR / "icones"
@@ -111,6 +114,8 @@ class Adb:
     def __init__(self, serial: str = ""):
         self.serial = serial
         self.decalage = 0.0      # heure téléphone - heure PC (s)
+        self.video = None
+        self.video_panne = 0.0   # après un échec de la vidéo : screencap pendant une minute
 
     def _base(self):
         return ["adb"] + (["-s", self.serial] if self.serial else [])
@@ -154,7 +159,11 @@ class Adb:
         return time.time() + self.decalage
 
     def screencap(self) -> tuple[Image.Image, float]:
-        """Capture brute (rapide). Renvoie (image, heure téléphone de la capture)."""
+        """Renvoie (image, heure téléphone de la capture) : par la vidéo de scrcpy si possible,
+        sinon par « adb screencap » (~1,2 s)."""
+        r = self._capture_video()
+        if r is not None:
+            return r
         t0 = time.time()
         raw = self.run(["exec-out", "screencap"], binary=True, timeout=30)
         if len(raw) < 16:
@@ -169,6 +178,29 @@ class Adb:
         data = raw[len(raw) - n:]
         img = Image.frombuffer("RGBA", (w, h), data, "raw", "RGBA", 0, 1).convert("RGB")
         return img, t0 + 0.15 + self.decalage
+
+    def _capture_video(self):
+        if video.av is None or time.time() - self.video_panne < 60:
+            return None
+        if self.video is None or self.video.serial != self.serial:
+            self.arreter_video()
+            self.video = video.VideoEcran(self.serial)
+        try:
+            r = self.video.capture()
+        except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+            print(f"vidéo scrcpy indisponible, capture par adb : {e}", file=sys.stderr)
+            self.video_panne = time.time()
+            self.arreter_video()
+            return None
+        if r is None:                        # pas d'image neuve (écran éteint ?)
+            return None
+        img, t = r
+        return img, t + self.decalage
+
+    def arreter_video(self):
+        if self.video is not None:
+            self.video.arreter()
+            self.video = None
 
     def inactivite_s(self) -> float | None:
         """Secondes depuis le dernier toucher sur le téléphone (None si inconnu)."""

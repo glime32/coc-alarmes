@@ -22,7 +22,7 @@
 
 ## Il faut
 
-- un PC Linux avec Python 3 et `adb` (`android-tools`) ;
+- un PC Linux avec Python 3, `adb` (`android-tools`) et `scrcpy` : son serveur lit le presse-papier du téléphone et envoie l'écran en vidéo, bien plus vite qu'`adb screencap` (~1,2 s par capture), qui reste utilisé en secours ;
 - un téléphone Android branché en USB, **débogage USB** activé. Les alarmes passent par l'intent standard `SET_ALARM` ; la suppression des anciennes est faite pour l'Horloge Samsung ;
 - en option, Google Agenda (un client OAuth à créer une fois dans Google Cloud Console, l'appli explique comment) ou l'agenda du téléphone.
 
