@@ -1,9 +1,9 @@
 """Widgets peints à la main, style Clash of Clans : texte à contour, gros boutons 3D, interrupteur, pastilles."""
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, QRectF, QPointF, QSize, pyqtSignal, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtCore import Qt, QRectF, QPointF, QSize, QPropertyAnimation, QEasingCurve, pyqtProperty
 from PyQt6.QtGui import (QPainter, QPainterPath, QPen, QColor, QLinearGradient, QFontMetricsF, QBrush)
-from PyQt6.QtWidgets import QWidget, QPushButton, QAbstractButton, QSizePolicy, QLabel
+from PyQt6.QtWidgets import QWidget, QPushButton, QAbstractButton, QSizePolicy
 
 import theme
 

@@ -2,7 +2,6 @@
 """CoC Alarmes — améliorations Clash of Clans (export du jeu ou lecture d'écran) → alarmes Horloge Samsung + Google Agenda."""
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 import time
@@ -16,7 +15,7 @@ from PyQt6.QtGui import QImage, QPixmap, QPainter, QPen, QColor, QFont
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
     QTableWidget, QTableWidgetItem, QComboBox, QSplitter, QPlainTextEdit, QHeaderView,
-    QDialog, QFormLayout, QSpinBox, QCheckBox, QDialogButtonBox, QMessageBox, QGroupBox,
+    QFormLayout, QSpinBox, QCheckBox, QMessageBox, QGroupBox,
     QFileDialog, QDoubleSpinBox, QAbstractItemView, QSizePolicy, QTabWidget, QTimeEdit,
     QProgressBar, QLineEdit, QFrame, QScrollArea, QStackedWidget, QGridLayout, QGraphicsOpacityEffect,
     QSystemTrayIcon, QMenu,
@@ -914,7 +913,6 @@ class Fenetre(QMainWindow):
         cats = {a.categorie for a in res.ameliorations}
         if any(a.source == "export" for a in self.ams if a.categorie in cats):
             # l'export du jeu est exact : on garde ses lignes, le scan sert aux boosts + à vérifier
-            now = self.now()
             for o in res.ameliorations:
                 e = next((a for a in self.ams if a.nom == o.nom and a.categorie == o.categorie), None)
                 if e is None or o.illisible:

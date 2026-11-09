@@ -943,7 +943,6 @@ def conseiller(ams: list[Amelioration], boosts: list[Boost], cfg: dict, now: flo
     rows = [a for a in ams if a.actif and not a.illisible and a.categorie == "Ouvriers"]
     if not rows:
         return None, []
-    lvl = int(cfg.get("niveau_apprenti", 1))
     # fin de la potion déjà active (on n'en boit pas une 2e par-dessus)
     fin_potion = now
     for b in boosts:
